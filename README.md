@@ -1,4 +1,4 @@
-# Base Crypto Checkout Backend
+# LayerPay Base Crypto Checkout Backend
 
 A secure, scalable backend for accepting **USDC/ETH payments** on the **Base** blockchain.  
 Built with **Node.js**, **Express**, **PostgreSQL**, **Sequelize**, and **ethers.js**.
