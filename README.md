@@ -19,7 +19,7 @@ Built with **Node.js**, **Express**, **PostgreSQL**, **Sequelize**, and **ethers
 - **Backend**: Node.js, Express
 - **Database**: PostgreSQL + Sequelize ORM
 - **Blockchain**: ethers.js (Base RPC)
-- **Extras**: dotenv, uuid, morgan, cors
+- **Extras**: dotenv, morgan, cors
 
 ---
 
@@ -27,7 +27,7 @@ Built with **Node.js**, **Express**, **PostgreSQL**, **Sequelize**, and **ethers
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/sammyklan3/base-crypto-checkout-backend.git
+git clone https://github.com/sammyklan3/layerpay-api.git
 cd base-crypto-checkout-backend
 
 # 2. Install dependencies
