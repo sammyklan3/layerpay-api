@@ -28,7 +28,7 @@ Built with **Node.js**, **Express**, **PostgreSQL**, **Sequelize**, and **ethers
 ```bash
 # 1. Clone the repo
 git clone https://github.com/sammyklan3/layerpay-api.git
-cd base-crypto-checkout-backend
+cd layerpay-api
 
 # 2. Install dependencies
 npm install
