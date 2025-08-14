@@ -1,12 +1,20 @@
 import bcrypt from "bcrypt";
-import { generateAccessToken, generateRefreshToken, verifyToken } from "../utils/tokenUtils.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyToken,
+} from "../utils/tokenUtils.js";
 import env from "../config/env.js";
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
   // TODO: Fetch user from DB
-  const user = { id: 1, email: "test@example.com", passwordHash: await bcrypt.hash("password123", 10) };
+  const user = {
+    id: 1,
+    email: "test@example.com",
+    passwordHash: await bcrypt.hash("password123", 10),
+  };
 
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) return res.status(401).json({ error: "Invalid credentials" });
@@ -18,14 +26,14 @@ export const login = async (req, res) => {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 15 * 60 * 1000
+    maxAge: 15 * 60 * 1000,
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: env.NODE_ENV === "production",
     sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   res.json({ message: "Login successful" });
@@ -42,7 +50,7 @@ export const refresh = (req, res) => {
       httpOnly: true,
       secure: env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000
+      maxAge: 15 * 60 * 1000,
     });
     res.json({ message: "Token refreshed" });
   } catch {

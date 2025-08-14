@@ -23,7 +23,11 @@ export const startPaymentWatcher = async () => {
         const amount = value.toString();
 
         const order = await Order.findOne({
-          where: { merchantAddress: to.toLowerCase(), amount, status: "pending" }
+          where: {
+            merchantAddress: to.toLowerCase(),
+            amount,
+            status: "pending",
+          },
         });
 
         if (order) {

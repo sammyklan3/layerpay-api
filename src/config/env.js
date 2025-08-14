@@ -11,7 +11,7 @@ const requiredVars = [
   "DATABASE_URL",
   "ACCESS_TOKEN_SECRET",
   "REFRESH_TOKEN_SECRET",
-  "USDC_CONTRACT_ADDRESS"
+  "USDC_CONTRACT_ADDRESS",
 ];
 
 // Check for missing required env vars
@@ -31,5 +31,5 @@ export default {
   DATABASE_URL: process.env.DATABASE_URL,
   USDC_CONTRACT_ADDRESS: process.env.USDC_CONTRACT_ADDRESS,
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
-  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET
+  REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
 };
