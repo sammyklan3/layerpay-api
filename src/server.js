@@ -1,7 +1,7 @@
 import http from "http";
 import app from "./app.js";
 import env from "./config/env.js";
-import { sequelize } from "./config/database.js";
+import sequelize from "./config/database.js";
 import { startPaymentWatcher } from "./jobs/paymentWatcher.js";
 
 const PORT = env.PORT || 4000;
