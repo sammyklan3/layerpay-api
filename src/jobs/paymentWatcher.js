@@ -1,5 +1,5 @@
 import { getUSDCContract, getProvider } from "../config/blockchain.js";
-import Order from "../models/Order.js";
+import { Transaction } from "../models/Transaction.js";
 
 export const startPaymentWatcher = async () => {
   const usdc = getUSDCContract();
@@ -22,18 +22,18 @@ export const startPaymentWatcher = async () => {
         const { from, to, value } = log.args;
         const amount = value.toString();
 
-        const order = await Order.findOne({
+        const transaction = await Transaction.findOne({
           where: {
-            merchantAddress: to.toLowerCase(),
+            merchantAddress: to_address.toLowerCase(),
             amount,
             status: "pending",
           },
         });
 
-        if (order) {
-          order.status = "paid";
-          await order.save();
-          console.log(`Order ${order.id} marked as paid`);
+        if (transaction) {
+          transaction.status = "paid";
+          await transaction.save();
+          console.log(`Transaction ${transaction.id} marked as paid`);
         }
       }
 

@@ -2,14 +2,16 @@ import http from "http";
 import app from "./app.js";
 import env from "./config/env.js";
 import sequelize from "./config/database.js";
+import db from "./models/index.js";
 import { startPaymentWatcher } from "./jobs/paymentWatcher.js";
 
 const PORT = env.PORT || 4000;
 
 (async () => {
   try {
-    await sequelize.authenticate();
-    console.log("Database connected");
+    // Authenticate and sync db
+    await db.sequelize.sync();
+    console.log("Database synchronized");
 
     const server = http.createServer(app);
 
