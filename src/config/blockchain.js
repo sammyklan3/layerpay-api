@@ -6,17 +6,20 @@ const BASE_MAINNET = {
   name: "base"
 };
 
-const provider = new JsonRpcProvider(
-  "https://mainnet.base.org",
-  BASE_MAINNET
-);
+const provider = new JsonRpcProvider(env.BASE_RPC_URL, BASE_MAINNET);
 
 export const getProvider = () => provider;
 
 export const getUSDCContract = () => {
-    const USDC_ADDRESS = env.USDC_ADDRESS;
-    const abi = [
+  const USDC_ADDRESS = env.USDC_CONTRACT_ADDRESS;
+
+  if (!USDC_ADDRESS) {
+    throw new Error("❌ USDC_CONTRACT_ADDRESS is not set in environment variables");
+  }
+
+  const abi = [
     "event Transfer(address indexed from, address indexed to, uint256 value)"
   ];
-    return new Contract(USDC_ADDRESS, abi, provider);
-}
+
+  return new Contract(USDC_ADDRESS, abi, provider);
+};

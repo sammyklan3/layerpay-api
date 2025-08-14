@@ -10,7 +10,8 @@ const requiredVars = [
   "MERCHANT_ADDRESS",
   "DATABASE_URL",
   "ACCESS_TOKEN_SECRET",
-  "REFRESH_TOKEN_SECRET"
+  "REFRESH_TOKEN_SECRET",
+  "USDC_CONTRACT_ADDRESS"
 ];
 
 // Check for missing required env vars
@@ -28,6 +29,7 @@ export default {
   BASE_RPC_URL: process.env.BASE_RPC_URL,
   MERCHANT_ADDRESS: process.env.MERCHANT_ADDRESS.toLowerCase(),
   DATABASE_URL: process.env.DATABASE_URL,
+  USDC_CONTRACT_ADDRESS: process.env.USDC_CONTRACT_ADDRESS,
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET
 };
