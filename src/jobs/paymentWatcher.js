@@ -1,13 +1,9 @@
 import { getUSDCContract, getProvider } from "../config/blockchain.js";
-import { getAddress } from "ethers";
 import Order from "../models/Order.js";
 
 export const startPaymentWatcher = async () => {
   const usdc = getUSDCContract();
   const provider = getProvider();
-
-  // Normalize contract address to correct checksum
-  usdc.address = getAddress(usdc.address);
 
   let lastBlock = await provider.getBlockNumber();
   console.log(`Payment watcher started at block ${lastBlock}`);
