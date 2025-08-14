@@ -6,6 +6,7 @@ Built with **Node.js**, **Express**, **PostgreSQL**, **Sequelize**, and **ethers
 ---
 
 ## Features
+
 - **Crypto Checkout** — Accept USDC or ETH directly into your wallet.
 - **Base L2** — Low gas fees, fast confirmation times.
 - **PostgreSQL + Sequelize** — Reliable order storage & easy querying.
@@ -16,6 +17,7 @@ Built with **Node.js**, **Express**, **PostgreSQL**, **Sequelize**, and **ethers
 ---
 
 ## Tech Stack
+
 - **Backend**: Node.js, Express
 - **Database**: PostgreSQL + Sequelize ORM
 - **Blockchain**: ethers.js (Base RPC)
@@ -47,3 +49,4 @@ npx sequelize-cli db:migrate
 
 # 7. Start development server
 npm run dev
+```
