@@ -1,5 +1,5 @@
 import { getUSDCContract } from "../config/blockchain.js";
-import { Order } from "../models/index.js";
+import Order from "../models/Order.js";
 
 export const startPaymentWatcher = () => {
   const usdc = getUSDCContract();
