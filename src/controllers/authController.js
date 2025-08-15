@@ -1,5 +1,4 @@
-import { loginUser } from "../services/auth.service.js";
-import { registerUser } from "../services/auth.service.js";
+import { loginUser, registerUser, refreshUserToken } from "../services/auth.service.js";
 import env from "../config/env.js";
 
 async function login(req, res) {
@@ -46,8 +45,8 @@ async function refresh(req, res) {
 
   try {
     const decoded = verifyToken(token, env.REFRESH_TOKEN_SECRET);
-    const newAccessToken = generateAccessToken(decoded.id);
-    res.cookie("accessToken", newAccessToken, {
+    const { accessToken } = refreshUserToken(decoded.id);
+    res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: env.NODE_ENV === "production",
       sameSite: "strict",

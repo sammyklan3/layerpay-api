@@ -50,4 +50,10 @@ async function registerUser(name, email, password) {
   return { accessToken, refreshToken };
 }
 
-export { loginUser, registerUser };
+// Refresh service
+async function refreshUserToken(userId) {
+  const accessToken = generateAccessToken(userId);
+  return { accessToken };
+}
+
+export { loginUser, registerUser, refreshUserToken };
