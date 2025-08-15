@@ -1,45 +1,46 @@
-import bcrypt from "bcrypt";
-import {
-  generateAccessToken,
-  generateRefreshToken,
-  verifyToken,
-} from "../utils/tokenUtils.js";
+import { loginUser } from "../services/auth.service.js";
+import { registerUser } from "../services/auth.service.js";
 import env from "../config/env.js";
 
-export const login = async (req, res) => {
+async function login(req, res) {
   const { email, password } = req.body;
 
-  // TODO: Fetch user from DB
-  const user = {
-    id: 1,
-    email: "test@example.com",
-    passwordHash: await bcrypt.hash("password123", 10),
-  };
+  try {
+    const { accessToken, refreshToken } = await loginUser(email, password);
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.json({ accessToken });
+  } catch (error) {
+    res.status(401).json({ error: error.message });
+  }
+}
 
-  const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) return res.status(401).json({ error: "Invalid credentials" });
+async function register(req, res) {
+  const { name, email, password } = req.body;
 
-  const accessToken = generateAccessToken(user.id);
-  const refreshToken = generateRefreshToken(user.id);
+  try {
+    const { accessToken, refreshToken } = await registerUser(
+      name,
+      email,
+      password
+    );
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.json({ accessToken });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
 
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 15 * 60 * 1000,
-  });
-
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
-
-  res.json({ message: "Login successful" });
-};
-
-export const refresh = (req, res) => {
+async function refresh(req, res) {
   const token = req.cookies.refreshToken;
   if (!token) return res.status(401).json({ error: "No refresh token" });
 
@@ -56,10 +57,11 @@ export const refresh = (req, res) => {
   } catch {
     return res.status(401).json({ error: "Invalid refresh token" });
   }
-};
+}
 
-export const logout = (req, res) => {
-  res.clearCookie("accessToken");
+async function logout(req, res) {
   res.clearCookie("refreshToken");
   res.json({ message: "Logged out" });
-};
+}
+
+export { login, register, refresh, logout };
