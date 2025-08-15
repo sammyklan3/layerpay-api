@@ -25,13 +25,11 @@ for (const file of files) {
   const exportValue = module.default || module;
 
   // If it's a function (factory), call it
-  const model = typeof exportValue === "function"
-    ? exportValue(sequelize)
-    : exportValue;
+  const model =
+    typeof exportValue === "function" ? exportValue(sequelize) : exportValue;
 
   db[model.name] = model;
 }
-
 
 // Apply associations
 Object.keys(db).forEach((modelName) => {
