@@ -10,6 +10,10 @@ ApiKey.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
+    userId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
     key: DataTypes.STRING,
     secret: DataTypes.STRING,
     status: {

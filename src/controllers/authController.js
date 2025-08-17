@@ -1,4 +1,8 @@
-import { loginUser, registerUser, refreshUserToken } from "../services/auth.service.js";
+import {
+  loginUser,
+  registerUser,
+  refreshUserToken,
+} from "../services/auth.service.js";
 import env from "../config/env.js";
 
 async function login(req, res) {
