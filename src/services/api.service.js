@@ -29,4 +29,11 @@ const createApiKey = async (userId, project) => {
   return api;
 };
 
-export { createApiKey };
+// Get api keys
+const getApiKeys = async () => {
+  return await ApiKey.findAll({
+    attributes: { exclude: ["secret"] }
+  });
+};
+
+export { createApiKey, getApiKeys };
