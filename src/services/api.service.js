@@ -1,0 +1,24 @@
+import { ApiKey } from "../models/ApiKey.js";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+
+// Create a new API key
+const createApiKey = async (userId) => {
+  const apiKey = "layerpay_pk_" + crypto.randomBytes(16).toString("hex");
+  const apiSecretRaw = "layerpay_sk_" + crypto.randomBytes(32).toString("hex");
+
+  // Hash the secret
+  const apiSecretHash = await bcrypt.hash(apiSecretRaw, 12);
+
+  // Save (public + hash)
+  const api = await ApiKey.create({
+    userId,
+    key: apiKey,
+    secret: apiSecretHash,
+    status: "active",
+  });
+
+  return api;
+};
+
+export { createApiKey };
