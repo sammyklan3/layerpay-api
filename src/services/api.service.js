@@ -30,8 +30,9 @@ const createApiKey = async (userId, project) => {
 };
 
 // Get api keys
-const getApiKeys = async () => {
+const getApiKeys = async (userId) => {
   return await ApiKey.findAll({
+    where: { userId },
     attributes: { exclude: ["secret"] }
   });
 };
