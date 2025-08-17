@@ -3,7 +3,14 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 
 // Create a new API key
-const createApiKey = async (userId) => {
+const createApiKey = async (userId, project) => {
+  const requiredFields = { userId, project };
+  for (const [key, value] of Object.entries(requiredFields)) {
+    if (!value) {
+      throw new Error(`${key} is required`);
+    }
+  }
+
   const apiKey = "layerpay_pk_" + crypto.randomBytes(16).toString("hex");
   const apiSecretRaw = "layerpay_sk_" + crypto.randomBytes(32).toString("hex");
 
@@ -13,6 +20,7 @@ const createApiKey = async (userId) => {
   // Save (public + hash)
   const api = await ApiKey.create({
     userId,
+    project,
     key: apiKey,
     secret: apiSecretHash,
     status: "active",

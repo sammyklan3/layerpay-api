@@ -16,6 +16,7 @@ ApiKey.init(
     },
     key: DataTypes.STRING,
     secret: DataTypes.STRING,
+    project: DataTypes.STRING,
     status: {
       type: DataTypes.ENUM("active", "revoked"),
       defaultValue: "active",
