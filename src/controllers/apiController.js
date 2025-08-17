@@ -1,4 +1,4 @@
-import { createApiKey } from "../services/api.service.js";
+import { createApiKey, getApiKeys } from "../services/api.service.js";
 
 // Controller for creating an api key
 async function createApiKeyController(req, res) {
@@ -7,4 +7,11 @@ async function createApiKeyController(req, res) {
   res.status(201).json(apiKey);
 }
 
-export { createApiKeyController };
+// Controller for getting api keys
+async function getApiKeysController(req, res) {
+  const userId = req.user.id;
+  const apiKeys = await getApiKeys(userId);
+  res.status(200).json(apiKeys);
+}
+
+export { createApiKeyController, getApiKeysController };
