@@ -1,4 +1,8 @@
-import { createApiKey, getApiKeys, revokeApiKey } from "../services/api.service.js";
+import {
+  createApiKey,
+  getApiKeys,
+  revokeApiKey,
+} from "../services/api.service.js";
 
 // Controller for creating an api key
 async function createApiKeyController(req, res) {
@@ -20,6 +24,6 @@ async function revokeApiKeyController(req, res) {
   const apiKey = req.params.apiKey;
   await revokeApiKey(userId, apiKey);
   res.status(204).send();
-};
+}
 
 export { createApiKeyController, getApiKeysController, revokeApiKeyController };
