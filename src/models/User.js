@@ -19,6 +19,10 @@ User.init(
       allowNull: false,
       unique: true,
     },
+    status: {
+      type: DataTypes.ENUM("active", "inactive"),
+      defaultValue: "active",
+    },
     passwordHash: {
       type: DataTypes.STRING,
       allowNull: false,
