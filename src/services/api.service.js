@@ -34,7 +34,7 @@ const createApiKey = async (userId, project) => {
 const getApiKeys = async (userId) => {
   return await ApiKey.findAll({
     where: { userId },
-    attributes: { exclude: ["secret"] }
+    attributes: { exclude: ["secret"] },
   });
 };
 
@@ -66,6 +66,6 @@ const revokeApiKey = async (userId, apiKey) => {
 
   api.status = "revoked";
   await api.save();
-}
+};
 
 export { createApiKey, getApiKeys, revokeApiKey };
