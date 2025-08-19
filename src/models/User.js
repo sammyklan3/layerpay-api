@@ -31,6 +31,22 @@ User.init(
       type: DataTypes.ENUM("admin", "developer"),
       defaultValue: "developer",
     },
+    lastLoginAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    failedLoginAttempts: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    lockedUntil: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    metadata: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+    },
   },
   {
     sequelize,
