@@ -10,8 +10,9 @@ Webhook.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    url: DataTypes.STRING,
-    secret: DataTypes.STRING,
+    url: { type: DataTypes.STRING, allowNull: false },
+    secret: { type: DataTypes.STRING, allowNull: false },
+    enabled: { type: DataTypes.BOOLEAN, defaultValue: true },
   },
   { sequelize, modelName: "webhook", timestamps: true }
 );

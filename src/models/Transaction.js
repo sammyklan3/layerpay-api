@@ -1,5 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/database.js";
+import e from "express";
 
 export class Transaction extends Model {}
 
@@ -10,17 +11,18 @@ Transaction.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    tx_hash: DataTypes.STRING,
-    from_address: DataTypes.STRING,
-    to_address: DataTypes.STRING,
-    amount: DataTypes.DECIMAL(36, 18),
-    currency: DataTypes.ENUM("ETH", "USDC"),
-    confirmations: DataTypes.INTEGER,
+    txHash: { type: DataTypes.STRING, allowNull: false, unique: true },
+    fromAddress: { type: DataTypes.STRING, allowNull: false },
+    toAddress: { type: DataTypes.STRING, allowNull: false },
+    asset: { type: DataTypes.ENUM("ETH", "USDC"), allowNull: false },
+    amount: { type: DataTypes.DECIMAL, allowNull: false },
+    blockNumber: { type: DataTypes.INTEGER },
     status: {
-      type: DataTypes.ENUM("pending", "confirmed", "failed"),
-      defaultValue: "pending",
+      type: DataTypes.ENUM("detected", "confirmed", "failed"),
+      defaultValue: "detected",
     },
-    block_number: DataTypes.INTEGER,
+    confirmationCount: { type: DataTypes.INTEGER, defaultValue: 0 },
+    rawLog: { type: DataTypes.JSONB },
   },
   { sequelize, modelName: "transaction", timestamps: true }
 );

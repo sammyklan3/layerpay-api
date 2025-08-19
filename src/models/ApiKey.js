@@ -10,17 +10,11 @@ ApiKey.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    userId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-    },
-    key: DataTypes.STRING,
-    secret: DataTypes.STRING,
-    project: DataTypes.STRING,
-    status: {
-      type: DataTypes.ENUM("active", "revoked"),
-      defaultValue: "active",
-    },
+    label: { type: DataTypes.STRING },
+    hashedKey: { type: DataTypes.STRING, allowNull: false },
+    scope: { type: DataTypes.JSONB },
+    lastUsedAt: { type: DataTypes.DATE },
+    revokedAt: { type: DataTypes.DATE },
   },
-  { sequelize, modelName: "api_key", timestamps: true }
+  { sequelize, modelName: "apiKey", timestamps: true }
 );
