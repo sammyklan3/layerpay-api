@@ -5,24 +5,26 @@ import { PaymentIntent } from "./PaymentIntent.js";
 import { Transaction } from "./Transaction.js";
 import { Webhook } from "./Webhook.js";
 import { WebhookEvent } from "./WebhookEvent.js";
+import { Merchant } from "./Merchant.js";
+import { MerchantUser } from "./MerchantUser.js";
+import { Refund } from "./Refund.js";
+import { Payout } from "./Payout.js";
 
-User.hasMany(ApiKey, { foreignKey: "user_id" });
-ApiKey.belongsTo(User, { foreignKey: "user_id" });
+User.belongsToMany(Merchant, { through: MerchantUser });
+Merchant.belongsToMany(User, { through: MerchantUser });
 
-User.hasMany(Wallet, { foreignKey: "user_id" });
-Wallet.belongsTo(User, { foreignKey: "user_id" });
+Merchant.hasMany(ApiKey);   ApiKey.belongsTo(Merchant);
+Merchant.hasMany(Wallet);   Wallet.belongsTo(Merchant);
+Merchant.hasMany(Webhook);  Webhook.belongsTo(Merchant);
+Merchant.hasMany(PaymentIntent); PaymentIntent.belongsTo(Merchant);
+Merchant.hasMany(Payout);   Payout.belongsTo(Merchant);
 
-User.hasMany(PaymentIntent, { foreignKey: "user_id" });
-PaymentIntent.belongsTo(User, { foreignKey: "user_id" });
+PaymentIntent.hasMany(Transaction); Transaction.belongsTo(PaymentIntent);
+PaymentIntent.hasMany(Refund); Refund.belongsTo(PaymentIntent);
 
-ApiKey.hasMany(PaymentIntent, { foreignKey: "api_key_id" });
-PaymentIntent.belongsTo(ApiKey, { foreignKey: "api_key_id" });
+Transaction.belongsTo(Wallet);
 
-PaymentIntent.hasMany(Transaction, { foreignKey: "payment_intent_id" });
-Transaction.belongsTo(PaymentIntent, { foreignKey: "payment_intent_id" });
+Webhook.hasMany(WebhookEvent); WebhookEvent.belongsTo(Webhook);
 
-User.hasMany(Webhook, { foreignKey: "user_id" });
-Webhook.belongsTo(User, { foreignKey: "user_id" });
-
-Webhook.hasMany(WebhookEvent, { foreignKey: "webhook_id" });
-WebhookEvent.belongsTo(Webhook, { foreignKey: "webhook_id" });
+Refund.belongsTo(Transaction, { foreignKey: "transactionId" });
+Payout.belongsTo(Transaction, { foreignKey: "transactionId", allowNull: true });
