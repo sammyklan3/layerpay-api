@@ -10,47 +10,14 @@ User.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
+    name: { type: DataTypes.STRING, allowNull: false },
+    email: { type: DataTypes.STRING, allowNull: false, unique: true },
+    passwordHash: { type: DataTypes.STRING, allowNull: false },
     status: {
       type: DataTypes.ENUM("active", "inactive"),
       defaultValue: "active",
     },
-    passwordHash: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    role: {
-      type: DataTypes.ENUM("admin", "developer"),
-      defaultValue: "developer",
-    },
-    lastLoginAt: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    failedLoginAttempts: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    lockedUntil: {
-      type: DataTypes.DATE,
-      allowNull: true,
-    },
-    metadata: {
-      type: DataTypes.JSONB,
-      allowNull: true,
-    },
+    lastLoginAt: { type: DataTypes.DATE },
   },
-  {
-    sequelize,
-    modelName: "user",
-    timestamps: true,
-  }
+  { sequelize, modelName: "user", timestamps: true }
 );

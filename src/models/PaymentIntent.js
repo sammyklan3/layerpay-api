@@ -10,15 +10,29 @@ PaymentIntent.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    amount: DataTypes.DECIMAL(36, 18),
-    currency: DataTypes.ENUM("ETH", "USDC"),
-    deposit_address: DataTypes.STRING,
+    amountFiat: { type: DataTypes.DECIMAL, allowNull: false },
+    fiatCurrency: { type: DataTypes.STRING, allowNull: false },
+    amountCrypto: { type: DataTypes.DECIMAL, allowNull: false },
+    cryptoCurrency: { type: DataTypes.ENUM("ETH", "USDC"), allowNull: false },
+    chain: { type: DataTypes.ENUM("base"), defaultValue: "base" },
     status: {
-      type: DataTypes.ENUM("pending", "confirmed", "failed", "expired"),
-      defaultValue: "pending",
+      type: DataTypes.ENUM(
+        "created",
+        "pending",
+        "paid",
+        "underpaid",
+        "overpaid",
+        "expired",
+        "canceled",
+        "refunded"
+      ),
+      defaultValue: "created",
     },
-    expires_at: DataTypes.DATE,
-    metadata: DataTypes.JSONB,
+    expiresAt: { type: DataTypes.DATE },
+    pricingLockedAt: { type: DataTypes.DATE },
+    pricingTtlSeconds: { type: DataTypes.INTEGER },
+    metadata: { type: DataTypes.JSONB },
+    idempotencyKey: { type: DataTypes.STRING, unique: true },
   },
-  { sequelize, modelName: "payment_intent", timestamps: true }
+  { sequelize, modelName: "paymentIntent", timestamps: true }
 );

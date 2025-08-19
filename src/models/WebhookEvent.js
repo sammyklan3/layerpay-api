@@ -10,17 +10,26 @@ WebhookEvent.init(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    event_type: DataTypes.STRING,
-    payload: DataTypes.JSONB,
+    eventType: {
+      type: DataTypes.ENUM(
+        "checkout.created",
+        "payment.detected",
+        "payment.confirmed",
+        "payment.failed",
+        "session.expired",
+        "refund.created",
+        "payout.created"
+      ),
+      allowNull: false,
+    },
+    payload: { type: DataTypes.JSONB, allowNull: false },
+    attempts: { type: DataTypes.INTEGER, defaultValue: 0 },
+    lastAttemptAt: { type: DataTypes.DATE },
+    nextAttemptAt: { type: DataTypes.DATE },
     status: {
-      type: DataTypes.ENUM("pending", "delivered", "failed"),
-      defaultValue: "pending",
+      type: DataTypes.ENUM("queued", "delivered", "failed"),
+      defaultValue: "queued",
     },
-    attempts: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    last_attempt_at: DataTypes.DATE,
   },
-  { sequelize, modelName: "webhook_event", timestamps: true }
+  { sequelize, modelName: "webhookEvent", timestamps: true }
 );
