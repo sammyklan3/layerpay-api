@@ -41,6 +41,7 @@ const createApiKey = async (userId, merchantId, project) => {
  * Get API keys for a merchant
  */
 const getApiKeys = async (userId, merchantId) => {
+  if (!merchantId) throw new Error("Merchant ID is required");
   // Verify user has access
   const merchantUser = await MerchantUser.findOne({
     where: { userId, merchantId },
