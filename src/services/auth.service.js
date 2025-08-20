@@ -1,19 +1,15 @@
 import { User } from "../models/User.js";
+import { Merchant } from "../models/Merchant.js";
+import { MerchantUser } from "../models/MerchantUser.js";
 import bcrypt from "bcrypt";
 import {
   generateAccessToken,
   generateRefreshToken,
 } from "../utils/tokenUtils.js";
 
-// Login service
+// -------------------- LOGIN --------------------
 async function loginUser(email, password) {
-  // Check if the fields are filled
-  const requiredFields = { email, password };
-  for (const [key, value] of Object.entries(requiredFields)) {
-    if (!value) {
-      throw new Error(`${key} is required`);
-    }
-  }
+  if (!email || !password) throw new Error("Email and password are required");
 
   const user = await User.findOne({ where: { email } });
   if (!user) throw new Error("User not found");
@@ -21,36 +17,79 @@ async function loginUser(email, password) {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new Error("Invalid credentials");
 
+  // Fetch merchant memberships
+  const merchants = await Merchant.findAll({
+    include: [
+      {
+        model: MerchantUser,
+        where: { userId: user.id },
+        attributes: ["role"],
+      },
+    ],
+  });
+
   const accessToken = generateAccessToken(user.id);
   const refreshToken = generateRefreshToken(user.id);
 
-  return { accessToken, refreshToken };
+  return {
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+    merchants: merchants.map((m) => ({
+      id: m.id,
+      name: m.name,
+      role: m.merchant_users[0].role, // role from join table
+    })),
+    accessToken,
+    refreshToken,
+  };
 }
 
-// Register
-async function registerUser(name, email, password) {
-  // Check if the fields are filled
-  const requiredFields = { name, email, password };
-  for (const [key, value] of Object.entries(requiredFields)) {
-    if (!value) {
-      throw new Error(`${key} is required`);
-    }
-  }
+// -------------------- REGISTER --------------------
+async function registerUser(name, email, password, merchantName) {
+  if (!name || !email || !password)
+    throw new Error("Name, email, and password are required");
 
   const existingUser = await User.findOne({ where: { email } });
   if (existingUser) throw new Error("User already exists");
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = new User({ name, email, passwordHash });
-  await user.save();
+  const user = await User.create({ name, email, passwordHash });
+
+  // When registering a new user, also create a default merchant
+  const merchant = await Merchant.create({
+    name: merchantName || `${name}'s Merchant`,
+  });
+
+  // Link user as the owner of this merchant
+  await MerchantUser.create({
+    merchantId: merchant.id,
+    userId: user.id,
+    role: "owner",
+  });
 
   const accessToken = generateAccessToken(user.id);
   const refreshToken = generateRefreshToken(user.id);
 
-  return { accessToken, refreshToken };
+  return {
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+    merchant: {
+      id: merchant.id,
+      name: merchant.name,
+      role: "owner",
+    },
+    accessToken,
+    refreshToken,
+  };
 }
 
-// Refresh service
+// -------------------- REFRESH --------------------
 async function refreshUserToken(userId) {
   const accessToken = generateAccessToken(userId);
   return { accessToken };

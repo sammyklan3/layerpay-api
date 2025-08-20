@@ -23,13 +23,14 @@ async function login(req, res) {
 }
 
 async function register(req, res) {
-  const { name, email, password } = req.body;
+  const { name, email, password, merchantName } = req.body;
 
   try {
     const { accessToken, refreshToken } = await registerUser(
       name,
       email,
-      password
+      password,
+      merchantName
     );
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
