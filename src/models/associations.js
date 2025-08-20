@@ -10,21 +10,33 @@ import { MerchantUser } from "./MerchantUser.js";
 import { Refund } from "./Refund.js";
 import { Payout } from "./Payout.js";
 
-User.belongsToMany(Merchant, { through: MerchantUser });
-Merchant.belongsToMany(User, { through: MerchantUser });
+// Explicit join table relations
+Merchant.hasMany(MerchantUser, { foreignKey: "merchantId" });
+MerchantUser.belongsTo(Merchant, { foreignKey: "merchantId" });
 
-Merchant.hasMany(ApiKey);   ApiKey.belongsTo(Merchant);
-Merchant.hasMany(Wallet);   Wallet.belongsTo(Merchant);
-Merchant.hasMany(Webhook);  Webhook.belongsTo(Merchant);
-Merchant.hasMany(PaymentIntent); PaymentIntent.belongsTo(Merchant);
-Merchant.hasMany(Payout);   Payout.belongsTo(Merchant);
+User.hasMany(MerchantUser, { foreignKey: "userId" });
+MerchantUser.belongsTo(User, { foreignKey: "userId" });
 
-PaymentIntent.hasMany(Transaction); Transaction.belongsTo(PaymentIntent);
-PaymentIntent.hasMany(Refund); Refund.belongsTo(PaymentIntent);
+Merchant.hasMany(ApiKey);
+ApiKey.belongsTo(Merchant);
+Merchant.hasMany(Wallet);
+Wallet.belongsTo(Merchant);
+Merchant.hasMany(Webhook);
+Webhook.belongsTo(Merchant);
+Merchant.hasMany(PaymentIntent);
+PaymentIntent.belongsTo(Merchant);
+Merchant.hasMany(Payout);
+Payout.belongsTo(Merchant);
+
+PaymentIntent.hasMany(Transaction);
+Transaction.belongsTo(PaymentIntent);
+PaymentIntent.hasMany(Refund);
+Refund.belongsTo(PaymentIntent);
 
 Transaction.belongsTo(Wallet);
 
-Webhook.hasMany(WebhookEvent); WebhookEvent.belongsTo(Webhook);
+Webhook.hasMany(WebhookEvent);
+WebhookEvent.belongsTo(Webhook);
 
 Refund.belongsTo(Transaction, { foreignKey: "transactionId" });
 Payout.belongsTo(Transaction, { foreignKey: "transactionId", allowNull: true });
