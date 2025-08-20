@@ -22,11 +22,14 @@ async function loginUser(email, password) {
     include: [
       {
         model: MerchantUser,
-        where: { userId: user.id },
         attributes: ["role"],
+        where: { userId: user.id },
+        required: true,
       },
     ],
   });
+
+  console.log("Merchants:", merchants);
 
   const accessToken = generateAccessToken(user.id);
   const refreshToken = generateRefreshToken(user.id);
@@ -40,7 +43,7 @@ async function loginUser(email, password) {
     merchants: merchants.map((m) => ({
       id: m.id,
       name: m.name,
-      role: m.merchant_users[0].role, // role from join table
+      role: m.merchantUsers[0].role, // role from join table
     })),
     accessToken,
     refreshToken,
