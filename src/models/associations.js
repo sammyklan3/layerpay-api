@@ -10,33 +10,54 @@ import { MerchantUser } from "./MerchantUser.js";
 import { Refund } from "./Refund.js";
 import { Payout } from "./Payout.js";
 
-// Explicit join table relations
-Merchant.hasMany(MerchantUser, { foreignKey: "merchantId" });
-MerchantUser.belongsTo(Merchant, { foreignKey: "merchantId" });
+export function setupAssociations() {
+  // -------------------- USER <-> MERCHANT (Many-to-Many) --------------------
+  User.belongsToMany(Merchant, { through: MerchantUser, foreignKey: "userId" });
+  Merchant.belongsToMany(User, {
+    through: MerchantUser,
+    foreignKey: "merchantId",
+  });
 
-User.hasMany(MerchantUser, { foreignKey: "userId" });
-MerchantUser.belongsTo(User, { foreignKey: "userId" });
+  // Explicit join table relations
+  Merchant.hasMany(MerchantUser, { foreignKey: "merchantId" });
+  MerchantUser.belongsTo(Merchant, { foreignKey: "merchantId" });
 
-Merchant.hasMany(ApiKey);
-ApiKey.belongsTo(Merchant);
-Merchant.hasMany(Wallet);
-Wallet.belongsTo(Merchant);
-Merchant.hasMany(Webhook);
-Webhook.belongsTo(Merchant);
-Merchant.hasMany(PaymentIntent);
-PaymentIntent.belongsTo(Merchant);
-Merchant.hasMany(Payout);
-Payout.belongsTo(Merchant);
+  User.hasMany(MerchantUser, { foreignKey: "userId" });
+  MerchantUser.belongsTo(User, { foreignKey: "userId" });
 
-PaymentIntent.hasMany(Transaction);
-Transaction.belongsTo(PaymentIntent);
-PaymentIntent.hasMany(Refund);
-Refund.belongsTo(PaymentIntent);
+  // -------------------- MERCHANT OWNED RESOURCES --------------------
+  Merchant.hasMany(ApiKey, { foreignKey: "merchantId" });
+  ApiKey.belongsTo(Merchant, { foreignKey: "merchantId" });
 
-Transaction.belongsTo(Wallet);
+  Merchant.hasMany(Wallet, { foreignKey: "merchantId" });
+  Wallet.belongsTo(Merchant, { foreignKey: "merchantId" });
 
-Webhook.hasMany(WebhookEvent);
-WebhookEvent.belongsTo(Webhook);
+  Merchant.hasMany(Webhook, { foreignKey: "merchantId" });
+  Webhook.belongsTo(Merchant, { foreignKey: "merchantId" });
 
-Refund.belongsTo(Transaction, { foreignKey: "transactionId" });
-Payout.belongsTo(Transaction, { foreignKey: "transactionId", allowNull: true });
+  Merchant.hasMany(PaymentIntent, { foreignKey: "merchantId" });
+  PaymentIntent.belongsTo(Merchant, { foreignKey: "merchantId" });
+
+  Merchant.hasMany(Payout, { foreignKey: "merchantId" });
+  Payout.belongsTo(Merchant, { foreignKey: "merchantId" });
+
+  // -------------------- PAYMENT FLOWS --------------------
+  PaymentIntent.hasMany(Transaction, { foreignKey: "paymentIntentId" });
+  Transaction.belongsTo(PaymentIntent, { foreignKey: "paymentIntentId" });
+
+  PaymentIntent.hasMany(Refund, { foreignKey: "paymentIntentId" });
+  Refund.belongsTo(PaymentIntent, { foreignKey: "paymentIntentId" });
+
+  Transaction.belongsTo(Wallet, { foreignKey: "walletId" });
+
+  // -------------------- REFUNDS & PAYOUTS --------------------
+  Refund.belongsTo(Transaction, { foreignKey: "transactionId" });
+  Payout.belongsTo(Transaction, {
+    foreignKey: "transactionId",
+    allowNull: true,
+  });
+
+  // -------------------- WEBHOOKS --------------------
+  Webhook.hasMany(WebhookEvent, { foreignKey: "webhookId" });
+  WebhookEvent.belongsTo(Webhook, { foreignKey: "webhookId" });
+}

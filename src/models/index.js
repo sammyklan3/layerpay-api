@@ -1,43 +1,33 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
 import sequelize from "../config/database.js";
-import "./associations.js";
+import { setupAssociations } from "./associations.js";
 
-// Recreate __dirname in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { User } from "./User.js";
+import { ApiKey } from "./ApiKey.js";
+import { Wallet } from "./Wallet.js";
+import { PaymentIntent } from "./PaymentIntent.js";
+import { Transaction } from "./Transaction.js";
+import { Webhook } from "./Webhook.js";
+import { WebhookEvent } from "./WebhookEvent.js";
+import { Merchant } from "./Merchant.js";
+import { MerchantUser } from "./MerchantUser.js";
+import { Refund } from "./Refund.js";
+import { Payout } from "./Payout.js";
 
-const db = {};
+setupAssociations();
 
-// Get all model files except index.js
-const files = fs
-  .readdirSync(__dirname)
-  .filter(
-    (file) =>
-      file.indexOf(".") !== 0 && file !== "index.js" && file.endsWith(".js")
-  );
-
-for (const file of files) {
-  const filePath = pathToFileURL(path.join(__dirname, file)).href;
-  const module = await import(filePath);
-
-  const exportValue = module.default || module;
-
-  // If it's a function (factory), call it
-  const model =
-    typeof exportValue === "function" ? exportValue(sequelize) : exportValue;
-
-  db[model.name] = model;
-}
-
-// Apply associations
-Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
-
-db.sequelize = sequelize;
+const db = {
+  sequelize,
+  User,
+  ApiKey,
+  Wallet,
+  PaymentIntent,
+  Transaction,
+  Webhook,
+  WebhookEvent,
+  Merchant,
+  MerchantUser,
+  Refund,
+  Payout,
+};
 
 export default db;
