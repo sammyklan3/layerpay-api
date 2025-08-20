@@ -29,8 +29,6 @@ async function loginUser(email, password) {
     ],
   });
 
-  console.log("Merchants:", merchants);
-
   const accessToken = generateAccessToken(user.id);
   const refreshToken = generateRefreshToken(user.id);
 

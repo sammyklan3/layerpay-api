@@ -9,9 +9,11 @@ const PORT = env.PORT || 4000;
 
 (async () => {
   try {
-    // Authenticate and sync db
-    await db.sequelize.sync();
-    console.log("Database synchronized");
+    await db.sequelize.authenticate();
+    console.log("✅ Database connected");
+
+    await db.sequelize.sync({ alter: true });
+    console.log("✅ Database synced");
 
     const server = http.createServer(app);
 
