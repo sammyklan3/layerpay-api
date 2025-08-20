@@ -12,7 +12,7 @@ ApiKey.init(
     },
     label: { type: DataTypes.STRING },
     hashedKey: { type: DataTypes.STRING, allowNull: false },
-    scope: { type: DataTypes.JSONB },
+    scope: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: ["read"] },
     lastUsedAt: { type: DataTypes.DATE },
     revokedAt: { type: DataTypes.DATE },
   },

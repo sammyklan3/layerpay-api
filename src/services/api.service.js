@@ -27,9 +27,9 @@ const createApiKey = async (userId, merchantId, project) => {
 
   const api = await ApiKey.create({
     merchantId,
-    project,
+    label: project,
     key: apiKey,
-    secret: apiSecretHash,
+    hashedKey: apiSecretHash,
     status: "active",
   });
 
