@@ -7,6 +7,7 @@ import {
 // Controller for creating an api key
 async function createApiKeyController(req, res) {
   const userId = req.user.id;
+  const project = req.body.project;
   const merchantId = req.params.merchantId;
   const apiKey = await createApiKey(userId, merchantId, project);
   res.status(201).json(apiKey);
