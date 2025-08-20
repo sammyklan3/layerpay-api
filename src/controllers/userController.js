@@ -1,4 +1,4 @@
-import { changeUserRole } from "../services/user.service";
+import { changeUserRole } from "../services/user.service.js";
 
 // Controller for changing user roles
 async function changeRoleController(req, res) {
