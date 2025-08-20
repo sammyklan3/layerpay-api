@@ -14,6 +14,10 @@ ApiKey.init(
     key: { type: DataTypes.STRING, allowNull: false, unique: true },
     hashedKey: { type: DataTypes.STRING, allowNull: false },
     scope: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: ["read"] },
+    status: {
+      type: DataTypes.ENUM("active", "revoked"),
+      defaultValue: "active",
+    },
     lastUsedAt: { type: DataTypes.DATE },
     revokedAt: { type: DataTypes.DATE },
   },
