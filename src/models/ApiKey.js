@@ -11,6 +11,7 @@ ApiKey.init(
       primaryKey: true,
     },
     label: { type: DataTypes.STRING },
+    key: { type: DataTypes.STRING, allowNull: false, unique: true },
     hashedKey: { type: DataTypes.STRING, allowNull: false },
     scope: { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: ["read"] },
     lastUsedAt: { type: DataTypes.DATE },

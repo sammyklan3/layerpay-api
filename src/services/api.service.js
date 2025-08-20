@@ -50,7 +50,7 @@ const getApiKeys = async (userId, merchantId) => {
 
   return await ApiKey.findAll({
     where: { merchantId },
-    attributes: { exclude: ["secret"] },
+    attributes: { exclude: ["hashedKey"] },
   });
 };
 
