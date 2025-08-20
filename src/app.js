@@ -25,7 +25,7 @@ app.use(cookieParser());
 app.use(compression());
 
 // Routes
-app.use("/api", routes);
+app.use("/v1", routes);
 
 // Error handler
 app.use(errorHandler);

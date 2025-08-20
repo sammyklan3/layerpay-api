@@ -1,67 +1,83 @@
 import { ApiKey } from "../models/ApiKey.js";
 import { User } from "../models/User.js";
+import { MerchantUser } from "../models/MerchantUser.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 
-// Create a new API key
-const createApiKey = async (userId, project) => {
-  const requiredFields = { userId, project };
+/**
+ * Create a new API key for a merchant
+ */
+const createApiKey = async (userId, merchantId, project) => {
+  const requiredFields = { userId, merchantId, project };
   for (const [key, value] of Object.entries(requiredFields)) {
-    if (!value) {
-      throw new Error(`${key} is required`);
-    }
+    if (!value) throw new Error(`${key} is required`);
   }
+
+  // Verify user belongs to the merchant
+  const merchantUser = await MerchantUser.findOne({
+    where: { userId, merchantId },
+  });
+  if (!merchantUser) throw new Error("User not authorized for this merchant");
 
   const apiKey = "layerpay_pk_" + crypto.randomBytes(16).toString("hex");
   const apiSecretRaw = "layerpay_sk_" + crypto.randomBytes(32).toString("hex");
 
-  // Hash the secret
+  // Hash the secret for storage
   const apiSecretHash = await bcrypt.hash(apiSecretRaw, 12);
 
-  // Save (public + hash)
   const api = await ApiKey.create({
-    userId,
+    merchantId,
     project,
     key: apiKey,
     secret: apiSecretHash,
     status: "active",
   });
 
-  return api;
+  // Return secret once (don’t store raw version!)
+  return { apiKey: api.key, apiSecret: apiSecretRaw };
 };
 
-// Get api keys
-const getApiKeys = async (userId) => {
+/**
+ * Get API keys for a merchant
+ */
+const getApiKeys = async (userId, merchantId) => {
+  if (!merchantId) throw new Error("Merchant ID is required");
+  // Verify user has access
+  const merchantUser = await MerchantUser.findOne({
+    where: { userId, merchantId },
+  });
+  if (!merchantUser) throw new Error("User not authorized for this merchant");
+
   return await ApiKey.findAll({
-    where: { userId },
+    where: { merchantId },
     attributes: { exclude: ["secret"] },
   });
 };
 
-// Revoke api keys
-const revokeApiKey = async (userId, apiKey) => {
-  const requiredFields = { userId, apiKey };
+/**
+ * Revoke an API key
+ */
+const revokeApiKey = async (userId, merchantId, apiKey) => {
+  const requiredFields = { userId, merchantId, apiKey };
   for (const [key, value] of Object.entries(requiredFields)) {
-    if (!value) {
-      throw new Error(`${key} is required`);
-    }
+    if (!value) throw new Error(`${key} is required`);
   }
 
-  const api = await ApiKey.findOne({ where: { userId, key: apiKey } });
-  if (!api) {
-    throw new Error("API key not found");
-  }
+  // Verify user belongs to merchant
+  const merchantUser = await MerchantUser.findOne({
+    where: { userId, merchantId },
+  });
+  if (!merchantUser) throw new Error("User not authorized for this merchant");
 
-  const isAdmin = await User.findOne({ where: { id: userId, role: "admin" } });
+  const api = await ApiKey.findOne({ where: { merchantId, key: apiKey } });
+  if (!api) throw new Error("API key not found");
 
-  // Check if the user owns the API key or is an admin
-  if (api.userId !== userId || !isAdmin) {
+  if (api.status === "revoked") throw new Error("API key already revoked");
+
+  // Only merchant owner OR platform admin can revoke
+  const user = await User.findByPk(userId);
+  if (user.role !== "admin" && merchantUser.role !== "owner") {
     throw new Error("You do not have permission to revoke this API key");
-  }
-
-  // Check if the API key is already revoked
-  if (api.status === "revoked") {
-    throw new Error("API key is already revoked");
   }
 
   api.status = "revoked";
