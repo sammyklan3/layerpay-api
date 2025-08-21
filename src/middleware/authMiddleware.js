@@ -15,6 +15,7 @@ export const authMiddleware = (req, res, next) => {
   try {
     const decoded = verifyToken(token, env.ACCESS_TOKEN_SECRET);
     req.user = decoded;
+    req.merchantId = decoded.merchants[0].id;
     next();
   } catch (err) {
     return res.status(401).json({ error: "Invalid token" });
