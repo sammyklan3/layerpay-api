@@ -1,8 +1,9 @@
 import { User } from "../models/User.js";
+import { MerchantUser } from "../models/MerchantUser.js";
 
-// Change role of a user
-const changeUserRole = async (userId, newRole) => {
-  const requiredFields = { userId, newRole };
+// Change role of a user within a merchant
+const changeUserRole = async (userId, merchantId, newRole) => {
+  const requiredFields = { userId, merchantId, newRole };
   for (const [key, value] of Object.entries(requiredFields)) {
     if (!value) {
       throw new Error(`${key} is required`);
@@ -10,22 +11,37 @@ const changeUserRole = async (userId, newRole) => {
   }
 
   // Check if the new role is valid
-  const validRoles = ["admin", "developer"];
+  const validRoles = ["owner", "admin", "developer", "viewer"];
   if (!validRoles.includes(newRole)) {
     throw new Error("Invalid role");
   }
 
+  // Ensure user exists and is active
   const user = await User.findByPk(userId);
   if (!user) {
     throw new Error("User not found");
   } else if (user.status === "inactive") {
     throw new Error("User is inactive");
-  } else if (user.role === newRole) {
+  }
+
+  // Find MerchantUser record
+  const merchantUser = await MerchantUser.findOne({
+    where: { userId, merchantId },
+  });
+
+  if (!merchantUser) {
+    throw new Error("User is not associated with this merchant");
+  }
+
+  if (merchantUser.role === newRole) {
     throw new Error("User already has this role");
   }
-  user.role = newRole;
-  await user.save();
-  return user;
+
+  // Update role
+  merchantUser.role = newRole;
+  await merchantUser.save();
+
+  return merchantUser;
 };
 
 // Get all users
