@@ -29,8 +29,19 @@ async function loginUser(email, password) {
     ],
   });
 
-  const accessToken = generateAccessToken(user.id);
-  const refreshToken = generateRefreshToken(user.id);
+  const merchantData = merchants.map((m) => ({
+    id: m.id,
+    name: m.name,
+    role: m.merchantUsers[0].role,
+  }));
+
+  const accessToken = generateAccessToken({
+    userId: user.id,
+    email: user.email,
+    merchants: merchantData,
+  });
+
+  const refreshToken = generateRefreshToken({ userId: user.id });
 
   return {
     user: {
@@ -38,11 +49,7 @@ async function loginUser(email, password) {
       name: user.name,
       email: user.email,
     },
-    merchants: merchants.map((m) => ({
-      id: m.id,
-      name: m.name,
-      role: m.merchantUsers[0].role, // role from join table
-    })),
+    merchants: merchantData,
     accessToken,
     refreshToken,
   };
@@ -71,8 +78,15 @@ async function registerUser(name, email, password, merchantName) {
     role: "owner",
   });
 
-  const accessToken = generateAccessToken(user.id);
-  const refreshToken = generateRefreshToken(user.id);
+  const merchantData = { id: merchant.id, name: merchant.name, role: "owner" };
+
+  const accessToken = generateAccessToken({
+    userId: user.id,
+    email: user.email,
+    merchants: [merchantData],
+  });
+
+  const refreshToken = generateRefreshToken({ userId: user.id });
 
   return {
     user: {
