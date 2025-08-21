@@ -1,4 +1,4 @@
-import { changeUserRole } from "../services/user.service.js";
+import { changeUserRole, getAllUsers } from "../services/user.service.js";
 
 // Controller for changing user roles
 async function changeRoleController(req, res) {
@@ -11,4 +11,14 @@ async function changeRoleController(req, res) {
   }
 }
 
-export { changeRoleController };
+// Controller for getting all users
+async function getAllUsersController(req, res) {
+  try {
+    const users = await getAllUsers();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export { changeRoleController, getAllUsersController };

@@ -28,4 +28,11 @@ const changeUserRole = async (userId, newRole) => {
   return user;
 };
 
-export { changeUserRole };
+// Get all users
+const getAllUsers = async () => {
+  return await User.findAll({
+    attributes: { exclude: ["passwordHash"] },
+  });
+};
+
+export { changeUserRole, getAllUsers };
