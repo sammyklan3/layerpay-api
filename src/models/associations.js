@@ -9,6 +9,7 @@ import { Merchant } from "./Merchant.js";
 import { MerchantUser } from "./MerchantUser.js";
 import { Refund } from "./Refund.js";
 import { Payout } from "./Payout.js";
+import { RefreshToken } from "./RefreshToken.js";
 
 export function setupAssociations() {
   // -------------------- USER <-> MERCHANT (Many-to-Many) --------------------
@@ -60,4 +61,8 @@ export function setupAssociations() {
   // -------------------- WEBHOOKS --------------------
   Webhook.hasMany(WebhookEvent, { foreignKey: "webhookId" });
   WebhookEvent.belongsTo(Webhook, { foreignKey: "webhookId" });
+
+  // REFRESH TOKENS
+  User.hasMany(RefreshToken, { foreignKey: "userId" });
+  RefreshToken.belongsTo(User, { foreignKey: "userId" });
 }
