@@ -12,6 +12,7 @@ import { Merchant } from "./Merchant.js";
 import { MerchantUser } from "./MerchantUser.js";
 import { Refund } from "./Refund.js";
 import { Payout } from "./Payout.js";
+import { RefreshToken } from "./RefreshToken.js";
 
 setupAssociations();
 
@@ -26,6 +27,7 @@ const db = {
   WebhookEvent,
   Merchant,
   MerchantUser,
+  RefreshToken,
   Refund,
   Payout,
 };
