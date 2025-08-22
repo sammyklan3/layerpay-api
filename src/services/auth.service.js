@@ -1,11 +1,27 @@
 import { User } from "../models/User.js";
 import { Merchant } from "../models/Merchant.js";
 import { MerchantUser } from "../models/MerchantUser.js";
+import { RefreshToken } from "../models/RefreshToken.js";
 import bcrypt from "bcrypt";
 import {
   generateAccessToken,
   generateRefreshToken,
 } from "../utils/tokenUtils.js";
+
+// Helper: create and save refresh token in DB
+async function createRefreshToken(userId) {
+  const token = generateRefreshToken({ userId });
+  const expiresAt = new Date();
+  expiresAt.setDate(expiresAt.getDate() + 7); // 7 days validity
+
+  await RefreshToken.create({
+    userId,
+    token,
+    expiresAt,
+  });
+
+  return token;
+}
 
 // -------------------- LOGIN --------------------
 async function loginUser(email, password) {
@@ -41,7 +57,11 @@ async function loginUser(email, password) {
     merchants: merchantData,
   });
 
-  const refreshToken = generateRefreshToken({ userId: user.id });
+  const refreshToken = await createRefreshToken(user.id);
+
+  // Update lastLoginAt in user
+  user.lastLoginAt = new Date();
+  await user.save();
 
   return {
     user: {
@@ -86,7 +106,7 @@ async function registerUser(name, email, password, merchantName) {
     merchants: [merchantData],
   });
 
-  const refreshToken = generateRefreshToken({ userId: user.id });
+  const refreshToken = await createRefreshToken(user.id);
 
   return {
     user: {
@@ -94,19 +114,46 @@ async function registerUser(name, email, password, merchantName) {
       name: user.name,
       email: user.email,
     },
-    merchant: {
-      id: merchant.id,
-      name: merchant.name,
-      role: "owner",
-    },
+    merchant: merchantData,
     accessToken,
     refreshToken,
   };
 }
 
 // -------------------- REFRESH --------------------
-async function refreshUserToken(userId) {
-  const accessToken = generateAccessToken(userId);
+async function refreshUserToken(token) {
+  const storedToken = await RefreshToken.findOne({
+    where: { token, revoked: false },
+    include: User,
+  });
+
+  if (!storedToken) throw new Error("Invalid refresh token");
+  if (storedToken.expiresAt < new Date()) throw new Error("Token expired");
+
+  const user = storedToken.user;
+  const merchants = await Merchant.findAll({
+    include: [
+      {
+        model: MerchantUser,
+        attributes: ["role"],
+        where: { userId: user.id },
+        required: true,
+      },
+    ],
+  });
+
+  const merchantData = merchants.map((m) => ({
+    id: m.id,
+    name: m.name,
+    role: m.merchantUsers[0].role,
+  }));
+
+  const accessToken = generateAccessToken({
+    userId: user.id,
+    email: user.email,
+    merchants: merchantData,
+  });
+
   return { accessToken };
 }
 

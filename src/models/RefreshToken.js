@@ -1,7 +1,5 @@
-// models/RefreshToken.js
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/database.js";
-import { User } from "./User.js";
 
 export class RefreshToken extends Model {}
 
@@ -30,7 +28,7 @@ RefreshToken.init(
     },
 
     replacedByToken: {
-      type: DataTypes.STRING, // optional – useful if rotating refresh tokens
+      type: DataTypes.STRING, // rotating refresh tokens
       allowNull: true,
     },
   },
