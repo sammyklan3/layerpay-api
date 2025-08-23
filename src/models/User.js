@@ -18,6 +18,7 @@ User.init(
       defaultValue: "active",
     },
     lastLoginAt: { type: DataTypes.DATE },
+    isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
   },
   { sequelize, modelName: "user", timestamps: true }
 );
