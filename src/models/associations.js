@@ -72,5 +72,7 @@ export function setupAssociations() {
     foreignKey: { name: "userId", allowNull: false },
     onDelete: "CASCADE",
   });
-  EmailOtp.belongsTo(User, { foreignKey: { name: "userId", allowNull: false } });
+  EmailOtp.belongsTo(User, {
+    foreignKey: { name: "userId", allowNull: false },
+  });
 }

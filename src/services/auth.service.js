@@ -2,25 +2,48 @@ import { User } from "../models/User.js";
 import { Merchant } from "../models/Merchant.js";
 import { MerchantUser } from "../models/MerchantUser.js";
 import { RefreshToken } from "../models/RefreshToken.js";
+import { EmailOtp } from "../models/EmailOtp.js";
+import env from "../config/env.js";
+import { Op } from "sequelize";
+import crypto from "crypto";
 import bcrypt from "bcrypt";
+import nodemailer from "nodemailer";
 import {
   generateAccessToken,
   generateRefreshToken,
 } from "../utils/tokenUtils.js";
 
-// Helper: create and save refresh token in DB
+// -------------------- HELPERS --------------------
+
+// Refresh tokens
 async function createRefreshToken(userId) {
   const token = generateRefreshToken({ userId });
   const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7); // 7 days validity
+  expiresAt.setDate(expiresAt.getDate() + 7);
 
-  await RefreshToken.create({
-    userId,
-    token,
-    expiresAt,
-  });
-
+  await RefreshToken.create({ userId, token, expiresAt });
   return token;
+}
+
+// OTP helpers
+function generateOtp() {
+  return crypto.randomInt(100000, 999999).toString();
+}
+function hashOtp(otp) {
+  return crypto.createHash("sha256").update(otp).digest("hex");
+}
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: { user: env.EMAIL_USER, pass: env.EMAIL_PASS },
+});
+async function sendOtpEmail(to, otp) {
+  await transporter.sendMail({
+    from: env.EMAIL_FROM,
+    to,
+    subject: "Verify your email",
+    text: `Your verification code is ${otp}. It expires in ${env.OTP_TTL_MINUTES} minutes.`,
+    html: `<p>Your verification code is <b>${otp}</b>. It expires in ${env.OTP_TTL_MINUTES} minutes.</p>`,
+  });
 }
 
 // -------------------- LOGIN --------------------
@@ -33,10 +56,9 @@ async function loginUser(email, password) {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new Error("Invalid credentials");
 
-  if (!user.isVerified)
-    throw new Error("Please verify your email before logging in");
+  if (!user.isVerified) throw new Error("Please verify your email first");
 
-  // Fetch merchant memberships
+  // Merchant memberships
   const merchants = await Merchant.findAll({
     include: [
       {
@@ -47,7 +69,6 @@ async function loginUser(email, password) {
       },
     ],
   });
-
   const merchantData = merchants.map((m) => ({
     id: m.id,
     name: m.name,
@@ -59,19 +80,13 @@ async function loginUser(email, password) {
     email: user.email,
     merchants: merchantData,
   });
-
   const refreshToken = await createRefreshToken(user.id);
 
-  // Update lastLoginAt in user
   user.lastLoginAt = new Date();
   await user.save();
 
   return {
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    },
+    user: { id: user.id, name: user.name, email: user.email },
     merchants: merchantData,
     accessToken,
     refreshToken,
@@ -83,44 +98,91 @@ async function registerUser(name, email, password, merchantName) {
   if (!name || !email || !password)
     throw new Error("Name, email, and password are required");
 
-  const existingUser = await User.findOne({ where: { email } });
-  if (existingUser) throw new Error("User already exists");
+  const existing = await User.findOne({ where: { email } });
+  if (existing) throw new Error("User already exists");
 
   const passwordHash = await bcrypt.hash(password, 10);
   const user = await User.create({ name, email, passwordHash });
 
-  // When registering a new user, also create a default merchant
   const merchant = await Merchant.create({
     name: merchantName || `${name}'s Merchant`,
   });
-
-  // Link user as the owner of this merchant
   await MerchantUser.create({
     merchantId: merchant.id,
     userId: user.id,
     role: "owner",
   });
 
-  const merchantData = { id: merchant.id, name: merchant.name, role: "owner" };
-
-  const accessToken = generateAccessToken({
+  // Generate OTP + store hashed
+  const otp = generateOtp();
+  await EmailOtp.create({
     userId: user.id,
-    email: user.email,
-    merchants: [merchantData],
+    otpHash: hashOtp(otp),
+    expiresAt: new Date(Date.now() + env.OTP_TTL_MINUTES * 60 * 1000),
+    sentAt: new Date(),
   });
-
-  const refreshToken = await createRefreshToken(user.id);
+  await sendOtpEmail(email, otp);
 
   return {
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    },
-    merchant: merchantData,
-    accessToken,
-    refreshToken,
+    message: "User registered. OTP sent to email for verification.",
   };
+}
+
+// -------------------- RESEND OTP --------------------
+async function resendOtp(email) {
+  const user = await User.findOne({ where: { email } });
+  if (!user) throw new Error("User not found");
+  if (user.isVerified) throw new Error("User already verified");
+
+  const lastOtp = await EmailOtp.findOne({
+    where: { userId: user.id },
+    order: [["createdAt", "DESC"]],
+  });
+  if (
+    lastOtp &&
+    (Date.now() - new Date(lastOtp.sentAt).getTime()) / 1000 <
+      env.OTP_MIN_RESEND_SECONDS
+  ) {
+    throw new Error("Please wait before requesting a new code");
+  }
+
+  const otp = generateOtp();
+  await EmailOtp.create({
+    userId: user.id,
+    otpHash: hashOtp(otp),
+    expiresAt: new Date(Date.now() + env.OTP_TTL_MINUTES * 60 * 1000),
+    sentAt: new Date(),
+  });
+  await sendOtpEmail(email, otp);
+
+  return { message: "OTP resent to email" };
+}
+
+// -------------------- VERIFY --------------------
+async function verifyUserEmail(email, otp) {
+  const user = await User.findOne({ where: { email } });
+  if (!user) throw new Error("User not found");
+  if (user.isVerified) return { message: "Already verified" };
+
+  const candidate = await EmailOtp.findOne({
+    where: {
+      userId: user.id,
+      expiresAt: { [Op.gt]: new Date() },
+      usedAt: { [Op.is]: null },
+    },
+    order: [["createdAt", "DESC"]],
+  });
+  if (!candidate) throw new Error("No valid OTP found");
+
+  if (hashOtp(otp) !== candidate.otpHash) throw new Error("Invalid OTP");
+
+  candidate.usedAt = new Date();
+  await candidate.save();
+
+  user.isVerified = true;
+  await user.save();
+
+  return { message: "Email verified successfully" };
 }
 
 // -------------------- REFRESH --------------------
@@ -129,7 +191,6 @@ async function refreshUserToken(token) {
     where: { token, revoked: false },
     include: User,
   });
-
   if (!storedToken) throw new Error("Invalid refresh token");
   if (storedToken.expiresAt < new Date()) throw new Error("Token expired");
 
@@ -144,7 +205,6 @@ async function refreshUserToken(token) {
       },
     ],
   });
-
   const merchantData = merchants.map((m) => ({
     id: m.id,
     name: m.name,
@@ -160,15 +220,10 @@ async function refreshUserToken(token) {
   return { accessToken };
 }
 
-// -------------------- VERIFY --------------------
-async function verifyUserEmail(userId) {
-  const user = await User.findByPk(userId);
-  if (!user) throw new Error("User not found");
-
-  user.isVerified = true;
-  await user.save();
-
-  return { message: "Email verified successfully" };
-}
-
-export { loginUser, registerUser, refreshUserToken, verifyUserEmail };
+export {
+  loginUser,
+  registerUser,
+  resendOtp,
+  verifyUserEmail,
+  refreshUserToken,
+};
