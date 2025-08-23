@@ -33,7 +33,8 @@ async function loginUser(email, password) {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new Error("Invalid credentials");
 
-  if (!user.isVerified) throw new Error("Please verify your email before logging in");
+  if (!user.isVerified)
+    throw new Error("Please verify your email before logging in");
 
   // Fetch merchant memberships
   const merchants = await Merchant.findAll({
@@ -159,4 +160,15 @@ async function refreshUserToken(token) {
   return { accessToken };
 }
 
-export { loginUser, registerUser, refreshUserToken };
+// -------------------- VERIFY --------------------
+async function verifyUserEmail(userId) {
+  const user = await User.findByPk(userId);
+  if (!user) throw new Error("User not found");
+
+  user.isVerified = true;
+  await user.save();
+
+  return { message: "Email verified successfully" };
+}
+
+export { loginUser, registerUser, refreshUserToken, verifyUserEmail };

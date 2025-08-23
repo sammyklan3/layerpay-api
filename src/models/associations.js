@@ -10,6 +10,7 @@ import { MerchantUser } from "./MerchantUser.js";
 import { Refund } from "./Refund.js";
 import { Payout } from "./Payout.js";
 import { RefreshToken } from "./RefreshToken.js";
+import { EmailOtp } from "./EmailOtp.js";
 
 export function setupAssociations() {
   // -------------------- USER <-> MERCHANT (Many-to-Many) --------------------
@@ -65,4 +66,11 @@ export function setupAssociations() {
   // REFRESH TOKENS
   User.hasMany(RefreshToken, { foreignKey: "userId" });
   RefreshToken.belongsTo(User, { foreignKey: "userId" });
+
+  // EMAIL OTP
+  User.hasMany(EmailOtp, {
+    foreignKey: { name: "userId", allowNull: false },
+    onDelete: "CASCADE",
+  });
+  EmailOtp.belongsTo(User, { foreignKey: { name: "userId", allowNull: false } });
 }
