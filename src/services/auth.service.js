@@ -33,6 +33,8 @@ async function loginUser(email, password) {
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new Error("Invalid credentials");
 
+  if (!user.isVerified) throw new Error("Please verify your email before logging in");
+
   // Fetch merchant memberships
   const merchants = await Merchant.findAll({
     include: [
