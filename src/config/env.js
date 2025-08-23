@@ -12,6 +12,11 @@ const requiredVars = [
   "ACCESS_TOKEN_SECRET",
   "REFRESH_TOKEN_SECRET",
   "USDC_CONTRACT_ADDRESS",
+  "OTP_MIN_RESEND_SECONDS",
+  "EMAIL_USER",
+  "EMAIL_FROM",
+  "EMAIL_PASS",
+  "OTP_TTL_MINUTES",
 ];
 
 // Check for missing required env vars
@@ -32,4 +37,9 @@ export default {
   USDC_CONTRACT_ADDRESS: process.env.USDC_CONTRACT_ADDRESS,
   ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET,
   REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET,
+  EMAIL_FROM: process.env.EMAIL_FROM,
+  EMAIL_USER: process.env.EMAIL_USER,
+  EMAIL_PASS: process.env.EMAIL_PASS,
+  OTP_TTL_MINUTES: process.env.OTP_TTL_MINUTES,
+  OTP_MIN_RESEND_SECONDS: process.env.OTP_MIN_RESEND_SECONDS,
 };
