@@ -1,5 +1,5 @@
-import { DataTypes, Model } from "sequelize";
-import { sequelize } from "../db.js";
+import { Model, DataTypes } from "sequelize";
+import sequelize from "../config/database.js";
 import crypto from "crypto";
 
 export class EmailOtp extends Model {
