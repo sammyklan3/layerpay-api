@@ -130,6 +130,7 @@ async function registerUser(name, email, password, merchantName) {
 
 // -------------------- RESEND OTP --------------------
 async function resendOtp(email) {
+  if(!email) throw new Error("Email is required");
   const user = await User.findOne({ where: { email } });
   if (!user) throw new Error("User not found");
   if (user.isVerified) throw new Error("User already verified");
@@ -160,6 +161,7 @@ async function resendOtp(email) {
 
 // -------------------- VERIFY --------------------
 async function verifyUserEmail(email, otp) {
+  if (!email || !otp) throw new Error("Email and OTP are required");
   const user = await User.findOne({ where: { email } });
   if (!user) throw new Error("User not found");
   if (user.isVerified) return { message: "Already verified" };
