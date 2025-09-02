@@ -2,6 +2,8 @@ import {
   loginUser,
   registerUser,
   refreshUserToken,
+  resendOtp,
+  verifyUserEmail,
 } from "../services/auth.service.js";
 import env from "../config/env.js";
 
@@ -44,6 +46,26 @@ async function register(req, res) {
   }
 }
 
+async function resendOtp(req, res) {
+  const { email } = req.body;
+  try {
+    await resendOtp(email);
+    res.json({ message: "OTP resent" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
+async function verifyEmail(req, res) {
+  const { email, otp } = req.body;
+  try {
+    await verifyUserEmail(email, otp);
+    res.json({ message: "Email verified successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}
+
 async function refresh(req, res) {
   const token = req.cookies.refreshToken;
   if (!token) return res.status(401).json({ error: "No refresh token" });
@@ -68,4 +90,4 @@ async function logout(req, res) {
   res.json({ message: "Logged out" });
 }
 
-export { login, register, refresh, logout };
+export { login, register, refresh, resendOtp, verifyEmail, logout };
