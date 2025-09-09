@@ -11,7 +11,10 @@ async function login(req, res) {
   const { email, password } = req.body;
 
   try {
-    const { accessToken, refreshToken, user } = await loginUser(email, password);
+    const { accessToken, refreshToken, user } = await loginUser(
+      email,
+      password
+    );
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: env.NODE_ENV === "production",
@@ -59,7 +62,10 @@ async function resendOtpController(req, res) {
 async function verifyEmailController(req, res) {
   const { email, otp } = req.body;
   try {
-    const { accessToken, refreshToken, user } = await verifyUserEmail(email, otp);
+    const { accessToken, refreshToken, user } = await verifyUserEmail(
+      email,
+      otp
+    );
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: env.NODE_ENV === "production",
