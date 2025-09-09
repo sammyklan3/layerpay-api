@@ -11,14 +11,14 @@ async function login(req, res) {
   const { email, password } = req.body;
 
   try {
-    const { accessToken, refreshToken } = await loginUser(email, password);
+    const { accessToken, refreshToken, user } = await loginUser(email, password);
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    res.json({ accessToken });
+    res.json({ accessToken, user });
   } catch (error) {
     res.status(401).json({ error: error.message });
   }
@@ -46,7 +46,7 @@ async function register(req, res) {
   }
 }
 
-async function resendOtp(req, res) {
+async function resendOtpController(req, res) {
   const { email } = req.body;
   try {
     await resendOtp(email);
@@ -56,11 +56,17 @@ async function resendOtp(req, res) {
   }
 }
 
-async function verifyEmail(req, res) {
+async function verifyEmailController(req, res) {
   const { email, otp } = req.body;
   try {
-    await verifyUserEmail(email, otp);
-    res.json({ message: "Email verified successfully" });
+    const { accessToken, refreshToken, user } = await verifyUserEmail(email, otp);
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.json({ accessToken, user });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -90,4 +96,11 @@ async function logout(req, res) {
   res.json({ message: "Logged out" });
 }
 
-export { login, register, refresh, resendOtp, verifyEmail, logout };
+export {
+  login,
+  register,
+  refresh,
+  resendOtpController,
+  verifyEmailController,
+  logout,
+};

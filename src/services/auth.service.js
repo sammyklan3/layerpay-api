@@ -130,7 +130,7 @@ async function registerUser(name, email, password, merchantName) {
 
 // -------------------- RESEND OTP --------------------
 async function resendOtp(email) {
-  if(!email) throw new Error("Email is required");
+  if (!email) throw new Error("Email is required");
   const user = await User.findOne({ where: { email } });
   if (!user) throw new Error("User not found");
   if (user.isVerified) throw new Error("User already verified");
@@ -184,7 +184,36 @@ async function verifyUserEmail(email, otp) {
   user.isVerified = true;
   await user.save();
 
-  return { message: "Email verified successfully" };
+  // Merchant memberships
+  const merchants = await Merchant.findAll({
+    include: [
+      {
+        model: MerchantUser,
+        attributes: ["role"],
+        where: { userId: user.id },
+        required: true,
+      },
+    ],
+  });
+  const merchantData = merchants.map((m) => ({
+    id: m.id,
+    name: m.name,
+    role: m.merchantUsers[0].role,
+  }));
+
+  const accessToken = generateAccessToken({
+    userId: user.id,
+    email: user.email,
+    merchants: merchantData,
+  });
+  const refreshToken = await createRefreshToken(user.id);
+
+  return {
+    user: { id: user.id, name: user.name, email: user.email },
+    merchants: merchantData,
+    accessToken,
+    refreshToken,
+  };
 }
 
 // -------------------- REFRESH --------------------
