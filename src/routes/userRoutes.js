@@ -4,6 +4,7 @@ import { requireRole } from "../middleware/roleMiddleware.js";
 import {
   changeRoleController,
   getAllUsersController,
+  getSignedInUserDetailsController,
 } from "../controllers/userController.js";
 
 const router = Router();
@@ -21,5 +22,7 @@ router.get(
   // requireRole(["admin"]),
   getAllUsersController
 );
+
+router.get("/me", authMiddleware, getSignedInUserDetailsController);
 
 export default router;

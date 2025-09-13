@@ -1,4 +1,8 @@
-import { changeUserRole, getAllUsers, getSignedInUserDetails } from "../services/user.service.js";
+import {
+  changeUserRole,
+  getAllUsers,
+  getSignedInUserDetails,
+} from "../services/user.service.js";
 
 // Controller for changing user roles
 async function changeRoleController(req, res) {
@@ -32,4 +36,8 @@ async function getSignedInUserDetailsController(req, res) {
   }
 }
 
-export { changeRoleController, getAllUsersController, getSignedInUserDetailsController };
+export {
+  changeRoleController,
+  getAllUsersController,
+  getSignedInUserDetailsController,
+};
