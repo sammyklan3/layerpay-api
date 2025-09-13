@@ -51,4 +51,15 @@ const getAllUsers = async () => {
   });
 };
 
-export { changeUserRole, getAllUsers };
+// Get signed in user details
+const getSignedInUserDetails = async (userId) => {
+  const user = await User.findByPk(userId, {
+    attributes: { exclude: ["passwordHash"] },
+  });
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user;
+};
+
+export { changeUserRole, getAllUsers, getSignedInUserDetails };
